@@ -182,7 +182,7 @@ struct NGS_SV_MERGING_HANDLER{
 	int SV_merging(int argc, char *argv[]){
 		//char *joint_vcf_fn = argv[1];
 		faidx_t *c_ref_idx = reference_index_load("/media/fenghe/Data/reference/GRCh38_full_analysis_set_plus_decoy_hla.fa");
-		const char *joint_vcf_fn = "/media/fenghe/MyPassport_4T/bamdata/1KGP_gcSV/filltag_S5.vcf";
+		const char *joint_vcf_fn = "/media/fenghe/MyPassport_4T/bamdata/1KGP_HitSV/filltag_S5.vcf";
 		std::vector<SV_store_index> SV_idx;
 		std::vector<std::string> sample_info;
 		//index
@@ -220,7 +220,7 @@ struct NGS_SV_MERGING_HANDLER{
 			for(uint sample_ID = 0; sample_ID < sample_info.size(); sample_ID++){
 				//if(sample_ID > 10) break;
 				char vcf_fn[1024];
-				sprintf(vcf_fn, "/media/fenghe/MyPassport_4T/bamdata/1KGP_gcSV/sorted_vcf/%s_sv_spa.sort.vcf.gz", sample_info[sample_ID].c_str());
+				sprintf(vcf_fn, "/media/fenghe/MyPassport_4T/bamdata/1KGP_HitSV/sorted_vcf/%s_sv_spa.sort.vcf.gz", sample_info[sample_ID].c_str());
 				fprintf(stderr, "Current handle %d: %s\n",sample_ID, vcf_fn);
 				BCF_FILE input_vcf;
 

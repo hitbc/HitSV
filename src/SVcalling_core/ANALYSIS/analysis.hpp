@@ -1650,7 +1650,7 @@ int read_ACGT_analysis(int argc, char *argv[]){
 
 struct SV_REGION_handler{
 
-	//gcSV tools vntr_analysis ref.fa single_sample_vcf_list.txt VNTR_region.bed
+	//HitSV tools vntr_analysis ref.fa single_sample_vcf_list.txt VNTR_region.bed
 	//1kgp_sample_info.txt
 
 	#define MIN_GCA_sv_len_GIAB 50
@@ -2129,7 +2129,7 @@ struct SV_REGION_handler{
 	int vcf_add_alt_string(int argc, char *argv[]){
 		//char *joint_vcf_fn = argv[1];
 		faidx_t *c_ref_idx = reference_index_load("/media/fenghe/Data/reference/GRCh38_full_analysis_set_plus_decoy_hla.fa");
-		const char *joint_vcf_fn = "/media/fenghe/MyPassport_4T/bamdata/1KGP_gcSV/filltag_S5.vcf";
+		const char *joint_vcf_fn = "/media/fenghe/MyPassport_4T/bamdata/1KGP_HitSV/filltag_S5.vcf";
 		std::vector<SV_INFO_vcf_add_alt_string> SV_info;
 		std::vector<SAMPLE_INFO_vcf_add_alt_string> sample_info;
 		//load joint data
@@ -2205,7 +2205,7 @@ struct SV_REGION_handler{
 			for(uint i = 0; i < sample_info.size(); i++){
 				//if(i > 30) break;
 				char vcf_fn[1024];
-				sprintf(vcf_fn, "/media/fenghe/MyPassport_4T/bamdata/1KGP_gcSV/sorted_vcf/%s_sv_spa.sort.vcf.gz", sample_info[i].sample_name.c_str());
+				sprintf(vcf_fn, "/media/fenghe/MyPassport_4T/bamdata/1KGP_HitSV/sorted_vcf/%s_sv_spa.sort.vcf.gz", sample_info[i].sample_name.c_str());
 				fprintf(stderr, "Current handle %s\n", vcf_fn);
 				BCF_FILE input_vcf;
 

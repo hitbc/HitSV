@@ -353,12 +353,12 @@ struct KMER_ERROR_PROFILE_HANDLER{
 		CONTIG_IDX_KMER_MASK = kmerMask[kmer_error_profile_kmer_length];
 		uint64_t MASK = CONTIG_IDX_KMER_MASK;
 		//set the kmer need polishing
-		//long AAA strings add, additional add kmer < 0.8
+		//long AAA strings add, additional add kmer < 0.6
 		uint8_t * buff_bin = &(bin_string[0]);
 		uint64_t kmer = bit2_nextKmer_init(buff_bin, kmer_error_profile_kmer_length);
 		for(int i = 0; i < kmer_number_indexing; i++){
 			kmer = bit2_nextKmerMASK( buff_bin + i, kmer, kmer_error_profile_kmer_length);
-			if(kmer == KMER_ALL_A_HOMO || KMER_ALL_T_HOMO == kmer || kmer_error_profile[kmer] < 0.5)
+			if(kmer == KMER_ALL_A_HOMO || KMER_ALL_T_HOMO == kmer || kmer_error_profile[kmer] < 0.6)
 				kmer_need_indexing[i] = 'P';
 			else
 				kmer_need_indexing[i] = 'N';

@@ -1969,6 +1969,7 @@ void SV_CALLING_Handler::LRS_SV_CALLING_germline(bool print_log,
 }
 
 void SV_CALLING_Handler::LRS_remove_duplications(bool print_log, std::vector<NOVA_SV_FINAL_RST_item> &LRS_r_l){
+	print_log = false;
 	std::sort(LRS_r_l.begin(), LRS_r_l.end(), NOVA_SV_FINAL_RST_item::cmp_by_position_TGS);
 	if(print_log){
 		//set basic GT:

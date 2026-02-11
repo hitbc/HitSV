@@ -657,14 +657,18 @@ void SV_CALLING_Handler::SRS_CLUSTERING_AND_COMBINE_signals() {
 	//load signal region by reference information
 	R_region region;
 	ref_handler->get_cur_region()->toR_region(region);
-	rlr->search(region.chr_ID, region.st_pos, region.ed_pos, rlr_result);
-	for(RefLocalRepeatItemR &rr : rlr_result){
-		int middle_pos;	int range;
-		rlr->get_middle(rr, middle_pos, range);
-		SRS_sveVNTR.emplace_back(rr.chrID, middle_pos, rr.chrID, middle_pos, 99, 99, RST::SOLID, range);
-		SRS_sveVNTR.back().setSignalType(SV::INS, SIG::SH);
-		if(print_log) std::cerr << "Repeat region adding:\t" << SRS_sveVNTR.back();
+	if(rlr->region_length != 0){
+		rlr->search(region.chr_ID, region.st_pos, region.ed_pos, rlr_result);
+		for(RefLocalRepeatItemR &rr : rlr_result){
+			int middle_pos;	int range;
+			rlr->get_middle(rr, middle_pos, range);
+			SRS_sveVNTR.emplace_back(rr.chrID, middle_pos, rr.chrID, middle_pos, 99, 99, RST::SOLID, range);
+			SRS_sveVNTR.back().setSignalType(SV::INS, SIG::SH);
+			if(print_log) std::cerr << "Repeat region adding:\t" << SRS_sveVNTR.back();
+		}
 	}
+
+
 	std::sort(SRS_sveVNTR.begin(), SRS_sveVNTR.end(), SVE::cmp_by_position);
 	SRS_combine_duplication(SRS_sveVNTR);
 }
@@ -2619,7 +2623,7 @@ bool SV_CALLING_Handler::LRS_assembly_variations(bool print_log, BAM_handler *cu
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~S6:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~candidate polishing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if(SRS_BAM_F != NULL && false){
+	if(SRS_BAM_F != NULL && contig_polsihing_handler.kmer_profile_handler->kmer_error_profile != NULL){
 		for(int haplotype_ID = 0; haplotype_ID < contig_selecter.use_contig_num; haplotype_ID++){
 			int cur_target_ID = contig_selecter.select_list[haplotype_ID].target_ID;
 			fprintf(stderr, "[candidate polishing]: current haplotype_ID %d contig ID %d\n", haplotype_ID, cur_target_ID);

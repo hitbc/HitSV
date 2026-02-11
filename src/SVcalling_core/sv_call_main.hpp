@@ -173,9 +173,19 @@ public:
 				nova_para->referenceFilename);
 		RefLocalRepeat *rlr = NULL;
 		BAM_STATUS *bs = NULL;
+
+		if(nova_para->KMER_ERROR_PROFILE_File == NULL && nova_para->LRS_BAM_F != NULL && nova_para->SRS_BAM_F != NULL){
+			fprintf(stderr, "WARNING: An error profile file is needed for Hybrid SV detection. It is strongly recommended to add -k parameter.\n");
+			// Skip loading
+		}	
 		if(nova_para->SRS_BAM_F != NULL){
 			rlr = (RefLocalRepeat *)xcalloc(1,sizeof(RefLocalRepeat));
-			rlr->load(nova_para->ref_idx_FileName);
+			if(nova_para->ref_idx_FileName != NULL && strlen(nova_para->ref_idx_FileName) > 0){
+				rlr->load(nova_para->ref_idx_FileName);
+			} else {
+				fprintf(stderr, "WARNING: Genome Context information is empty when processing SRS. It is strongly recommended to add -I parameter.\n");
+				// Skip loading
+			}
 			bs = (BAM_STATUS *)xcalloc(1, sizeof(BAM_STATUS));
 			if(nova_para->statsFileName != NULL){
 				fexist_check(nova_para->statsFileName);
@@ -187,6 +197,8 @@ public:
 		if(nova_para->KMER_ERROR_PROFILE_File != NULL){
 			kmer_profile_handler.load_data(nova_para->KMER_ERROR_PROFILE_File);
 		}
+
+
 		//SveHandler *sve_h = (SveHandler *)xcalloc(1, sizeof(SveHandler));
 		SV_CALLING_Handler *sve_h = new SV_CALLING_Handler;
 		{
@@ -200,7 +212,7 @@ public:
 				!nova_para->not_output_vcf_header, nova_para->force_calling_ALU,
 				nova_para->random_phasing, nova_para->output_small_var, nova_para->preset_platform,
 				nova_para->FC_BED_F, nova_para->OUT_MODE_int);
-		//	//PART5: for each choromosome
+		//PART5: for each choromosome
 		while(refHandler.load_seg_index())//get a new ref block in the reference, 2M bases per block
 		{
 			//build index for long SV detection

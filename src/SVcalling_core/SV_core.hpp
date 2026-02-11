@@ -1804,7 +1804,7 @@ public:
 		ca_re_locate.init();
 		ca_re_locate.setZdrop(50000,50000);
 
-		contig_polsihing_handler.init(kmer_profile_handler, &SRS_read.file);//todo::
+		contig_polsihing_handler.init(this->kmer_profile_handler, &SRS_read.file);//todo::
 
 		contig_align_region_Handler.init(ref_handler);
 		clip_contig_combine_Handler.init();
@@ -1979,14 +1979,17 @@ public:
     				for(std::vector<NOVA_SV_FINAL_RST_item>::value_type &sv: result_LRS_final){
     					if(ABS(sv.SV_length) < MIN_sv_len)//only re-genotype SVs NOT shorter than MIN_sv_len
     						continue;
-    					showSV(sv, "\nLRS re-genotype using SRS, Genotyping for:");
+    					if(print_log) showSV(sv, "\nLRS re-genotype using SRS, Genotyping for:");
     					int new_GT = sv.genotyping_LRS_Using_SRS(false, sig_para.MaxReadLen, &SRS_read.file, &ga, ref_handler);
     					if(sv.LRS_need_filter_by_SRS() && sv.contig_not_support_by_NGS())
     						sv.setGenotype_directly(0);//set to 0/0
     					else if(sv.LRS_need_reGT_by_SRS() && new_GT > 0 && new_GT <= 2)
     						sv.setGenotype_directly(new_GT);
     				}
-    			}else fprintf(stderr, "genotyping_LRS_Using_SRS SKIP\n\n");
+    			}else {
+					if(print_log) fprintf(stderr, "genotyping_LRS_Using_SRS SKIP\n\n");
+				}
+
     			if(random_phasing){
     				for(std::vector<NOVA_SV_FINAL_RST_item>::value_type &sv: result_LRS_final)
     					sv.randomly_phasing_Genotype(((float)global_SV_ID*1.897239));

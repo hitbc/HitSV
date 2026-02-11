@@ -636,7 +636,7 @@ public:
 		else if(is_duplication_sv)						sprintf(s->s + s->l, "%s\t","Duplication_sv");
 		else if(final_genotype == 0)					sprintf(s->s + s->l, "%s\t","LOW_DEPTH");
 		else if(!deletion_pass_DR_filter)				sprintf(s->s + s->l, "%s\t","DR_not_support");
-		else if(isVNTRcallerRst && QUAL_presetVNTR <=5)	sprintf(s->s + s->l, "%s\t","LOW_QUAL");
+		else if(isVNTRcallerRst && QUAL_presetVNTR <=10)	sprintf(s->s + s->l, "%s\t","LOW_QUAL");
 		else											sprintf(s->s + s->l, "%s\t","PASS");
 		s->l += strlen(s->s + s->l);
 		//INFO:type and length
@@ -1425,9 +1425,9 @@ public:
 
 		int NGS_suggest_GT = getGT_from_support_read(region_support_number[2][0], region_support_number[2][1], region_support_number[2][2]);
 
-		fprintf(stderr,"Region analysis: for region(1+2): ALT:REF:UNKNOW [%d, %d, %d]\n", region_support_number[2][0],
+		if(print_log) fprintf(stderr,"Region analysis: for region(1+2): ALT:REF:UNKNOW [%d, %d, %d]\n", region_support_number[2][0],
 				region_support_number[2][1], region_support_number[2][2]);
-		fprintf(stderr, "NGS_suggest_GT is : %s", (NGS_suggest_GT == 0)?"0/0":((NGS_suggest_GT == 1)?"0/1":"1/1"));
+		if(print_log) fprintf(stderr, "NGS_suggest_GT is : %s", (NGS_suggest_GT == 0)?"0/0":((NGS_suggest_GT == 1)?"0/1":"1/1"));
 		return NGS_suggest_GT;
 	}
 

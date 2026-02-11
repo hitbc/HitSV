@@ -2022,7 +2022,7 @@ struct KeyNodePath
 				else if (scoreDiff < 1.2)
 					SVQUAL = 3;
 				else if (scoreDiff < 1.5)
-					SVQUAL = 5;
+					SVQUAL = 10;
 				else if (scoreDiff < 2)
 					SVQUAL = 15;
 				else

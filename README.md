@@ -62,8 +62,11 @@ HitSV provides precompiled static linked binary files. Use the following command
 
 ### 1. Directly Obtain and Deploy Precompiled Static Binary
 
+Get Static Binary of HitSV tools at
+https://github.com/hitbc/HitSV/releases/
+
+Then:
 ```bash
-wget https://github.com/hitbc/HitSV/Release/HitSV
 ./HitSV --help
 ```
 
@@ -263,3 +266,4 @@ HitSV call -S 0 -E 0 -s 0 -F 1000000 -T SRS_HG002_stat.json -r  hs37d5_1_0_10000
 
 
 This project is protected by the [GNU GPL v3](LICENSE) license.
+

@@ -215,7 +215,7 @@ General steps:
 1. Perform single-sample variant detection for all samples;
 2. Based on the single-sample variant detection results, identify genomic intervals of interest;
 3. Use the (-b --FC_BED) parameter to perform local assembly on each sample in each genomic interval of interest to generate local contigs;
-4. Annotate the structure of all local contigs using the TRF algorithm and repeat Masker algorithm;
+4. Annotate the structure of all local contigs using the TRF and repeatMasker ;
 5. Based on the clustering algorithm for similar contigs, cluster similar contigs together and analyze the complex structural variant composition of population samples.
 
 Refer to "cohort_csv_analysis.md" for the complete workflow.
@@ -226,12 +226,12 @@ Refer to "cohort_csv_analysis.md" for the complete workflow.
 2. Contig sequence RM and TRF annotation;
 3. SV-TR array detection;
 
-Refer to "py/科研-MEI阵列-单样本检测.py" (科研-MEI阵列-单样本检测.py translates to: Research-MEI Array-Single Sample Detection.py) for the complete workflow.
+Refer to "py/mei_tr_array_single_region_detection.py" for the complete workflow.
 
 Based on workflow 7.1, obtain the variant annotation results from repeat Masker: [region].fa.out, then execute:
 
 ```bash
-python3 ./py/科研-MEI阵列-单样本检测.py region.fa.out
+python3 ./py/mei_tr_array_single_region_detection.py region.fa.out
 ```
 
 #### 7.3 Population Sample Complex Structural Variant Region - Nested Variant Detection
@@ -266,4 +266,5 @@ HitSV call -S 0 -E 0 -s 0 -F 1000000 -T SRS_HG002_stat.json -r  hs37d5_1_0_10000
 
 
 This project is protected by the [GNU GPL v3](LICENSE) license.
+
 

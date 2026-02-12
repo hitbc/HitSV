@@ -66,10 +66,14 @@ HitSV 提供预编译的静态链接二进制文件。使用以下命令进行�
 
 ### 1. 直接获取静态链接二进制文件并部署
 
+从如下位置获取HitSV的静态编译文件：
+https://github.com/hitbc/HitSV/releases/
+
+Then:
 ```bash
-wget https://github.com/hitbc/HitSV/Release/HitSV
 ./HitSV --help
 ```
+
 
 ### 2. 从源代码编译HitSV
 

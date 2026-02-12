@@ -13,6 +13,8 @@ Key Features:
 - Supports multiple sequencing platforms, including ASM (T2T), ONT, PacBio, Illumina, BGI-T7, etc.
 - Provides strategies for complex structural variant (CSV) analysis of population samples
 
+The structural variant (SV) detection results of HitSV tool on HG002/3/4/5/6/7 and the 1000 Genomes Project datasets are stored at https://github.com/hitbc/HitSV_call_results
+
 Table of Contents:
 
 * [Introduction](#introduction)
@@ -258,5 +260,6 @@ HitSV call -S 0 -E 0 -s 0 -F 1000000 -T SRS_HG002_stat.json -r  hs37d5_1_0_10000
 ```
 
 ## License
+
 
 This project is protected by the [GNU GPL v3](LICENSE) license.

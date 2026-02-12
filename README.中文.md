@@ -15,6 +15,9 @@ HitSV 是一个全面的结构变异检测方法，支持多种测序数据类�
 - 支持多种测序平台数据，包括ASM(T2T)、ONT、PacBio、Illumina、BGI-T7等
 - 提供面向群体样本复杂结构变异（CSV）分析策略
 
+- The structural variant (SV) detection results of HitSV tool on HG002/3/4/5/6/7 and the 1000 Genomes Project datasets are stored at https://github.com/hitbc/HitSV_call_results
+
+
 目录：
 
 * [简介](#简介)

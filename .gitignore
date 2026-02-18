@@ -1,0 +1,36 @@
+# Compiled files
+*.o
+*.d
+
+# Release files
+Release/HitSV
+Release/COLORTERM
+Release/HitSV-v2.0-release
+
+# Build directories
+Release/src/
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Log files
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Executables
+*.exe
+*.out
+*.bin
+
+# Environment files
+.env
+.env.local
+.env.*.local

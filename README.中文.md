@@ -15,9 +15,6 @@ HitSV 是一个全面的结构变异检测方法，支持多种测序数据类�
 - 支持多种测序平台数据，包括ASM(T2T)、ONT、PacBio、Illumina、BGI-T7等
 - 提供面向群体样本复杂结构变异（CSV）分析策略
 
-- The structural variant (SV) detection results of HitSV tool on HG002/3/4/5/6/7 and the 1000 Genomes Project datasets are stored at https://github.com/hitbc/HitSV_call_results
-
-
 目录：
 
 * [简介](#简介)
@@ -60,20 +57,18 @@ HitSV 是一个全面的结构变异检测方法，支持多种测序数据类�
 HitSV支持常见的二代测序平台的数据（Illumina、BGI-T7等）；也支持常见的三代测序平台的测序数据，包括ONT、PacBio的测序数据，或者全局组装结果数据（例如ASM、T2T）。
 HitSV在使用高质量三代测序数据（例如ONT-Q26、PacBio HiFi等）表现出较高的检测率和基因分型准确性；同时，HitSV也能分析错误率较高的三代测序数据（错误率约3%-5%的三代测序数据）。
 
+The structural variant (SV) detection results of HitSV tool on HG002/3/4/5/6/7 and the 1000 Genomes Project datasets are stored at https://github.com/hitbc/HitSV_call_results
+
 ## 安装
 
 HitSV 提供预编译的静态链接二进制文件。使用以下命令进行快速部署和执行：
 
 ### 1. 直接获取静态链接二进制文件并部署
 
-从如下位置获取HitSV的静态编译文件：
-https://github.com/hitbc/HitSV/releases/
-
-Then:
 ```bash
+wget https://github.com/hitbc/HitSV/Release/HitSV
 ./HitSV --help
 ```
-
 
 ### 2. 从源代码编译HitSV
 
@@ -121,15 +116,15 @@ HitSV call -S 1 -E 1 -s 11500000 -F 18500000 -l sample.LRS.bam -r ref.fa -o outp
 
 ### 2. 使用纯 SRS 数据检测和基因分型结构变异
 
-在分析前，我们建议使用 `HitSV ngs_fa_stat` 为参考基因组预先计算局部重复复杂性信息。常见人类参考基因组 grch38 和 hg37d5 的预构建结果可在 [GRCh38.stat.txt.gz](https://github.com/hitbc/HitSV/blob/main/demo_HitSV/GRCh38.stat.txt.gz) 和 [hs37d5.stat.txt.gz](https://github.com/hitbc/HitSV/blob/main/demo_HitSV/hs37d5.stat.txt.gz) 获取，使用前需要解压缩。
+在分析前，我们建议使用 `HitSV srs_fa_stat` 为参考基因组预先计算局部重复复杂性信息。常见人类参考基因组 grch38 和 hg37d5 的预构建结果可在 [GRCh38.stat.txt.gz](https://github.com/hitbc/HitSV/blob/main/demo_HitSV/GRCh38.stat.txt.gz) 和 [hs37d5.stat.txt.gz](https://github.com/hitbc/HitSV/blob/main/demo_HitSV/hs37d5.stat.txt.gz) 获取，使用前需要解压缩。
 
-当进行大规模序列研究或分析完整基因组的时候，使用 `HitSV ngs_trans_reads` 对于SRS数据进行预处理，以减少 I/O 需求并加速分析；该指令不会影响变异检测结果，但是会显著提高分析速度。
+当进行大规模序列研究或分析完整基因组的时候，使用 `HitSV srs_trans_reads` 对于SRS数据进行预处理，以减少 I/O 需求并加速分析；该指令不会影响变异检测结果，但是会显著提高分析速度。
 
 #### 执行全基因组检测
 
 ```bash
-HitSV ngs_fa_stat ref.fa > ref.stat.txt
-HitSV ngs_trans_reads ref.fa sample.SRS.bam TL.bam 
+HitSV srs_fa_stat ref.fa > ref.stat.txt
+HitSV srs_trans_reads ref.fa sample.SRS.bam TL.bam 
 samtools sort --output-fmt=BAM -o TL.sort.bam TL.bam
 samtools index TL.sort.bam
 HitSV call -n sample.SRS.bam -L TL.sort.bam -r ref.fa -I ref.stat.txt -o output.vcf 2> /dev/null
@@ -231,12 +226,12 @@ HitSV call -B BED -b region.bed -l sample.ASM.bam -r ref.fa -o output.bed 2> /de
 2. contig 序列 RM、TRF注释；
 3. SV-TR阵列检测；
 
-完整的工作流程 参阅“py/科研-MEI阵列-单样本检测.py”。
+完整的工作流程 参阅“py/mei_tr_array_single_region_detection.py”。
 
 基于流程7.1, 获取 repeat Masker的变异注释结果： [region].fa.out，然后执行：
 
 ```bash
-python3 ./py/科研-MEI阵列-单样本检测.py region.fa.out
+python3 ./py/mei_tr_array_single_region_detection.py region.fa.out
 ```
 
 #### 7.3 群体样本复杂结构变异区域-嵌套变异检测

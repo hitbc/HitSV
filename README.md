@@ -62,11 +62,8 @@ HitSV provides precompiled static linked binary files. Use the following command
 
 ### 1. Directly Obtain and Deploy Precompiled Static Binary
 
-Get Static Binary of HitSV tools at
-https://github.com/hitbc/HitSV/releases/
-
-Then:
 ```bash
+wget https://github.com/hitbc/HitSV/Release/HitSV
 ./HitSV --help
 ```
 
@@ -116,15 +113,15 @@ Note: Chromosome IDs and positions are 0-based. By default, whole-genome SV dete
 
 ### 2. Detect and Genotype Structural Variants Using Pure SRS Data
 
-Before analysis, we recommend using `HitSV ngs_fa_stat` to pre-calculate local repeat complexity information for the reference genome. Pre-built results for common human reference genomes grch38 and hg37d5 are available at [GRCh38.stat.txt.gz](https://github.com/hitbc/HitSV/blob/main/demo_HitSV/GRCh38.stat.txt.gz) and [hs37d5.stat.txt.gz](https://github.com/hitbc/HitSV/blob/main/demo_HitSV/hs37d5.stat.txt.gz), which need to be decompressed before use.
+Before analysis, we recommend using `HitSV srs_fa_stat` to pre-calculate local repeat complexity information for the reference genome. Pre-built results for common human reference genomes grch38 and hg37d5 are available at [GRCh38.stat.txt.gz](https://github.com/hitbc/HitSV/blob/main/demo_HitSV/GRCh38.stat.txt.gz) and [hs37d5.stat.txt.gz](https://github.com/hitbc/HitSV/blob/main/demo_HitSV/hs37d5.stat.txt.gz), which need to be decompressed before use.
 
-When conducting large-scale sequence research or analyzing complete genomes, use `HitSV ngs_trans_reads` to preprocess SRS data to reduce I/O requirements and accelerate analysis; this command does not affect variant detection results but significantly improves analysis speed.
+When conducting large-scale sequence research or analyzing complete genomes, use `HitSV srs_trans_reads` to preprocess SRS data to reduce I/O requirements and accelerate analysis; this command does not affect variant detection results but significantly improves analysis speed.
 
 #### Whole Genome Detection
 
 ```bash
-HitSV ngs_fa_stat ref.fa > ref.stat.txt
-HitSV ngs_trans_reads ref.fa sample.SRS.bam TL.bam 
+HitSV srs_fa_stat ref.fa > ref.stat.txt
+HitSV srs_trans_reads ref.fa sample.SRS.bam TL.bam 
 samtools sort --output-fmt=BAM -o TL.sort.bam TL.bam
 samtools index TL.sort.bam
 HitSV call -n sample.SRS.bam -L TL.sort.bam -r ref.fa -I ref.stat.txt -o output.vcf 2> /dev/null
@@ -215,7 +212,7 @@ General steps:
 1. Perform single-sample variant detection for all samples;
 2. Based on the single-sample variant detection results, identify genomic intervals of interest;
 3. Use the (-b --FC_BED) parameter to perform local assembly on each sample in each genomic interval of interest to generate local contigs;
-4. Annotate the structure of all local contigs using the TRF and repeatMasker ;
+4. Annotate the structure of all local contigs using the TRF algorithm and repeat Masker algorithm;
 5. Based on the clustering algorithm for similar contigs, cluster similar contigs together and analyze the complex structural variant composition of population samples.
 
 Refer to "cohort_csv_analysis.md" for the complete workflow.
@@ -264,7 +261,4 @@ HitSV call -S 0 -E 0 -s 0 -F 1000000 -T SRS_HG002_stat.json -r  hs37d5_1_0_10000
 
 ## License
 
-
 This project is protected by the [GNU GPL v3](LICENSE) license.
-
-

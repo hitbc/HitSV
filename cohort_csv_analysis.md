@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This document introduces a complete workflow for cohort CSV (Complex Structural Variation) analysis using the gcSV tool. This workflow is suitable for Long Read Sequencing (LRS) data and implements a complete process from single-sample variant detection to population CSV region analysis, filtering, precise detection, filtering, and clustering analysis through a series of steps.
+This document introduces a complete workflow for cohort CSV (Complex Structural Variation) analysis using the HitSV tool. This workflow is suitable for Long Read Sequencing (LRS) data and implements a complete process from single-sample variant detection to population CSV region analysis, filtering, precise detection, filtering, and clustering analysis through a series of steps.
 
 The workflow mainly includes the following core functions:
 - Preliminary variant detection at the single-sample level
@@ -67,7 +67,7 @@ WORK_DIR=$2
 PRESET=$3
 
 #Fixed parameters
-GCSV_TOOL="gcSVL call "
+GCSV_TOOL="HitSVL call "
 REF=GRCh38.fa
 
 mkdir ${WORK_DIR}
@@ -100,7 +100,7 @@ IN_VCF=./${SAMPLE_NAME}/D.vcf
 WORK_DIR=./${SAMPLE_NAME}/
 
 #Fixed parameters
-GCSV_TOOL="gcSV "
+GCSV_TOOL="HitSV "
 REF=GRCh38.fa
 
 mkdir ${WORK_DIR}
@@ -127,7 +127,6 @@ bash run_all_csv_region_500w_ana.sh > run_all_csv_region_500w_ana.bash.log &
 ```bash
 cd ./RST_ANA_CSV/
 cat */*hap*bed > ALL_single_hap.bed
-cat ALL_single_hap.bed | awk '{printf "%s\n",$1;}'
 cat ALL_single_hap.bed | awk '{printf "%s:%s-%s\n",$1,$2,$3;}' | sort | uniq -c > ALL_single_hap_summary.txt
 ```
 
@@ -159,20 +158,20 @@ BED_FILE=$3
 PRESET=$4
 
 #Fixed parameters
-GCSV_TOOL="gcSVL call "
+GCSV_TOOL="HitSVL call "
 REF=GRCh38.fa
 
 mkdir -p ${OUT_DIR}
 cd ${OUT_DIR}
 
-${GCSV_TOOL} -p ${PRESET} -b ${BED_FILE} -l ${BAM_FILE} -r ${REF} -o ./gcSV_FC_CSV_RST.txt 2> ./gcSV_FC_CSV_RST.log
+${GCSV_TOOL} -p ${PRESET} -b ${BED_FILE} -l ${BAM_FILE} -r ${REF} -o ./HitSV_FC_CSV_RST.txt 2> ./HitSV_FC_CSV_RST.log
 ```
 
 ### 4.2 Batch Submit Force Calling Jobs
 ```bash
 cd ./
-cat BAM.list | awk '{printf "sbatch ./single_sample.sh %s ./RST/%s/ ./AF_0.05_CSV_AF.sort.merge.bed ERR_PRONE \n",$1,$2;}' >  ./single_FC_gcSV_run_ALL.sh
-bash ./single_FC_gcSV_run_ALL.sh > ./single_FC_gcSV_run_ALL.log &
+cat BAM.list | awk '{printf "sbatch ./single_sample.sh %s ./RST/%s/ ./AF_0.05_CSV_AF.sort.merge.bed ERR_PRONE \n",$1,$2;}' >  ./single_FC_HitSV_run_ALL.sh
+bash ./single_FC_HitSV_run_ALL.sh > ./single_FC_HitSV_run_ALL.log &
 
 ```
 
@@ -190,7 +189,7 @@ IN_DIR=$1
 cd ${IN_DIR}
 
 #Delete results with read support equal to 1
-cat gcSV_FC_CSV_RST.txt | awk '{split($4,A,"="); split(A[2],B,":"); if(B[1] > 1) print $0}' > gcSV_FC_CSV_RST.FILTER.txt
+cat HitSV_FC_CSV_RST.txt | awk '{split($4,A,"="); split(A[2],B,":"); if(B[1] > 1) print $0}' > HitSV_FC_CSV_RST.FILTER.txt
 ```
 
 ### 5.2 Batch Submit Filtering Jobs
@@ -200,17 +199,17 @@ cat BAM.list | awk '{printf "sbatch ./single_sample_FILTER.sh ./RST/%s/\n",$2;}'
 bash ./single_sample_FILTER_run_ALL.sh > ./single_sample_FILTER_run_ALL.log
 ```
 
-## 6. Store Variants in Corresponding Regions
+## 6. Store contigs in Corresponding Regions
 
 ### 6.1 Prepare Input File List
 ```bash
 cd ./
-cat BAM.list | awk '{printf "./RST/%s/gcSV_FC_CSV_RST.FILTER.txt\n",$2}' > ont_contig_string_data_ALL_FL.txt
+cat BAM.list | awk '{printf "./RST/%s/HitSV_FC_CSV_RST.FILTER.txt\n",$2}' > ont_contig_string_data_ALL_FL.txt
 ```
 
 ### 6.2 Execute Variant Storage
 ```bash
-gcSVL tools contig_file_split ont_contig_string_data_ALL_FL.txt ./CONTIG_IN_REGION/ GRCh38.fa
+HitSVL tools contig_file_split ont_contig_string_data_ALL_FL.txt ./CONTIG_IN_REGION/ GRCh38.fa
 ```
 
 ## 7. Contig Clustering Analysis
@@ -224,7 +223,7 @@ PREFIX=$1
 WORD_DIR=$2
 FC_DIR=$3
 
-GCSV_TOOL="gcSVL call "
+GCSV_TOOL="HitSVL call "
 REF_38=GRCh38.fa
 RM_TOOL=RepeatMasker
 TRF_TOOL=trf
@@ -239,7 +238,7 @@ ${RM_TOOL} ${PREFIX}.fa > rm_log.txt 2>  rm_log2.txt
 #Execute TRF annotation:
 ${TRF_TOOL} ${PREFIX}.fa 2 7 7 80 10 10 500 -h -d -ngs 1> ${PREFIX}.fa.trf.out 2>  trf_log2.txt
 #Execute population CSV clustering analysis:
-${GCSV_TOOL} tools fc_joint_ana ${REGION_ID} .
+${GCSV_TOOL} tools fc_joint_ana ${PREFIX}.fa ${PREFIX}.fa.out ${PREFIX}.fa.trf.out 1
 ```
 
 #### 7.2 Batch Submit Annotation Jobs

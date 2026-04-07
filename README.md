@@ -42,6 +42,7 @@ Table of Contents:
     * [7.2 Population Sample Complex Structural Variant Region - MEI-TR Array Detection](#72-population-sample-complex-structural-variant-region-mei-tr-array-detection)
     * [7.3 Population Sample Complex Structural Variant Region - Nested Variant Detection](#73-population-sample-complex-structural-variant-region-nested-variant-detection)
 * [Demo](#demo)
+* [Changelog](#Changelog)
 * [License](#license)
 
 

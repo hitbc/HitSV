@@ -64,7 +64,7 @@ HitSV provides precompiled static linked binary files. Use the following command
 ### 1. Directly Obtain and Deploy Precompiled Static Binary
 
 ```bash
-wget https://github.com/hitbc/HitSV/Release/HitSV
+get latest release at "https://github.com/hitbc/HitSV/releases" 
 ./HitSV --help
 ```
 
@@ -262,11 +262,10 @@ HitSV call -S 0 -E 0 -s 0 -F 1000000 -T SRS_HG002_stat.json -r  hs37d5_1_0_10000
 
 ## Changelog
 
-### v2.0.2 2026-04-08
+### v2.0.2 2026-04-09
 
 Fixed bug: A bug was identified, fixed, and the relevant update has been pushed to GitHub.
-When performing variant calling on next-generation sequencing (NGS) data, a local repeat rate file R for the reference genome is required as input. Previously, if this file was not provided, the program would still run, but errors might occur under certain circumstances. Now, when the user omits this file, the program will skip the corresponding processes and no longer throw errors.
-
+When performing variant calling on next-generation sequencing (NGS) data, a local repeat rate file R for the reference genome is required as input. Previously, if this file was not provided, the program would still run, but errors might occur under certain circumstances. Now, when processing NGS data, the program will check for this file and terminate execution if the file is not found, thus avoiding potential issues.
 
 ## License
 

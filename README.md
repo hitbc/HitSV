@@ -33,14 +33,16 @@ Table of Contents:
   * [4. Multi-process Processing](#4-multi-process-processing)
     * [Divide the Entire Genome into Different Regions for Simultaneous Variant Detection](#divide-the-entire-genome-into-different-regions-for-simultaneous-variant-detection)
     * [Merge Variant Detection Result Files into a Complete File](#merge-variant-detection-result-files-into-a-complete-file)
-  * [5. Advanced Parameters for LRS Data Analysis](#5-advanced-parameters-for-lrs-data-analysis)
-  * [6. Local Assembly for Specified Intervals](#6-local-assembly-for-specified-intervals)
+  * [5. LRS error mode preset for local-assembly](#5-lrs-error-mode-preset-for-local-assembly)
+  * [6. Contig-to-Reference Alignment Parameters (Applicable to Both LRS and SRS)](#6-contig-to-reference-alignment-parameters-applicable-to-both-lrs-and-srs)
+  * [7. Output Parameters](#7-output-parameters)
+  * [8. Local Assembly for Specified Intervals](#8-local-assembly-for-specified-intervals)
     * [Generate VCF Format Results](#generate-vcf-format-results)
     * [Generate BED Format Results](#generate-bed-format-results)
-  * [7. Structural Variant Analysis for Population Samples](#7-structural-variant-analysis-for-population-samples)
-    * [7.1 Population Sample Complex Structural Variant (CSV) Clustering Analysis](#71-population-sample-complex-structural-variant-csv-clustering-analysis)
-    * [7.2 Population Sample Complex Structural Variant Region - MEI-TR Array Detection](#72-population-sample-complex-structural-variant-region-mei-tr-array-detection)
-    * [7.3 Population Sample Complex Structural Variant Region - Nested Variant Detection](#73-population-sample-complex-structural-variant-region-nested-variant-detection)
+  * [9. Structural Variant Analysis for Population Samples](#9-structural-variant-analysis-for-population-samples)
+    * [9.1 Population Sample Complex Structural Variant (CSV) Clustering Analysis](#91-population-sample-complex-structural-variant-csv-clustering-analysis)
+    * [9.2 Population Sample Complex Structural Variant Region - MEI-TR Array Detection](#92-population-sample-complex-structural-variant-region-mei-tr-array-detection)
+    * [9.3 Population Sample Complex Structural Variant Region - Nested Variant Detection](#93-population-sample-complex-structural-variant-region-nested-variant-detection)
 * [Demo](#demo)
 * [Changelog](#Changelog)
 * [License](#license)
@@ -174,15 +176,38 @@ cat chrY.vcf >> output.vcf
 
 This method is applicable to all analysis types (pure LRS, pure SRS, hybrid).
 
-### 5. Advanced Parameters for LRS Data Analysis
+### 5. LRS error mode preset for local-assembly
 
-- `--LRS_preset ONT_Q20` or `-p ONT_Q20`: Used to preset the type of input third-generation sequencing data. The default value is high-quality ONT dataset (ONT_Q20), and other available preset parameters include "ASM", "HIFI", and "ERR_PRONE". "ASM" is used for assembled result data, "ONT_Q20" and "HIFI" can be used for data with error rates below 1%, and "ERR_PRONE" can be used for data with error rates between 1% and 6%.
+- `--LRS_preset ONT_Q20` or `-p ONT_Q20`: Used to preset the type of input third-generation sequencing data. The default value is high-quality ONT dataset (ONT_Q20), and other available preset parameters include "ASM", "HIFI", and "ERR_PRONE". "ASM" is used for assembled result data, "ONT_Q20" and "HIFI" can be used for data with error rates below 1%, and "ERR_PRONE" can be used for data with error rates between 1% and 10%.
 
-- `--random_phasing 1` or `-f 1`: Used for random phasing of variants (0/1 --> 0|1 or 1|0 randomly; 1/1 --> 1|1). Heterozygous variants located on the same local haplotype will share the same random phasing result. It is enabled by default; setting it to `-f 0` will disable random phasing.
+### 6. Contig-to-Reference Alignment Parameters (Applicable to Both LRS and SRS)
 
-- `--Small_var 1` or `-v 1`: Can output small variants (SNPs or INDELs) located on the same local haplotype as SVs. It is enabled by default; setting it to `-v 0` will disable the output of small variants. It is recommended to disable the output of small variants when analyzing high-error-rate data.
+--Contig_aln_preset asm5 or -P asm5: Specifies the preset alignment parameters for contig-to-reference realignment via ksw2. This setting controls alignment sensitivity according to the expected sequence divergence between the sample and the reference genome, and is used for both long-read (LRS) and short-read (SRS) data analysis. Available presets are:
 
-### 6. Local Assembly for Specified Intervals
+asm5 (default): uses -A1 -B19 -O39,81 -E3,1. Optimized for species with low sequence divergence, such as human.
+
+asm10: uses -A1 -B9 -O16,41 -E2,1. Suitable for most species, including soybean, mouse, and monkey.
+
+asm20: uses -A1 -B4 -O6,26 -E2,1. Recommended for species with high sequence divergence, such as zebrafish or maize.
+The default value is asm5.
+
+### 7. Output Parameters
+
+- `-B, --output_format` : Specifies the format of the SV callset. Accepted values are VCF (default) and PURE_STR. The VCF option produces a standard VCF v4.2 file with HitSV‑specific annotations in the INFO field. The PURE_STR option writes a simplified tab‑delimited table containing only the core SV coordinates and types, which may be more convenient for custom downstream parsing.
+
+- `-f, --random_phasing` : Enables random phasing of heterozygous SVs. When set to 1 (default), unphased heterozygous genotypes (0/1) are randomly resolved to either 0|1 or 1|0, while homozygous alternative genotypes (1/1) are output as 1|1. All heterozygous variants residing on the same locally assembled contig are phased consistently. Set to 0 to output unphased genotypes without random assignment.
+
+- `-m, --MIN_SV_len` : Minimum length (in bp) for a structural variant to be reported. Variants shorter than this threshold are discarded.
+
+- `-v, --Small_var` : Controls the output of small variants (SNPs and INDELs) flanking detected SVs. When enabled (1, default), small variants that can be unambiguously phased to the same local haplotype as the SV are included in the output. This option is automatically ignored (treated as 0) in ERR_PRONE mode, where the high base‑calling error rate makes reliable small‑variant calling infeasible. Set to 0 to suppress small‑variant output in all modes.
+
+- `-o, --output` : Path to the output file. If not specified, results are written to standard output (stdout).
+
+- `-H, --no-header` : Suppress the VCF header (meta‑information lines and column header line) in the output. This flag is useful when concatenating results from multiple runs or when the header is not required for subsequent analysis.
+
+Note on ERR_PRONE mode: Because the -v option relies on accurate base‑level alignments, it is automatically disabled when using -p ERR_PRONE.
+
+### 8. Local Assembly for Specified Intervals
 
 When specifying intervals with the following parameters (-b --FC_BED), HitSV generates local assembly sequences for specific intervals. This function only applies to ASM and LRS datasets, not to SRS datasets, and the length of each specified interval cannot exceed 50,000 bp.
 
@@ -202,11 +227,11 @@ The generated local contig results are stored in BED format for analysis of comp
 HitSV call -B BED -b region.bed -l sample.ASM.bam -r ref.fa -o output.bed 2> /dev/null
 ```
 
-### 7. Structural Variant Analysis for Population Samples
+### 9. Structural Variant Analysis for Population Samples
 
 This function is used to analyze the structural variant structure of population samples within specific chromosomal intervals. It is particularly designed to address the detection of complex structural variants (CSV). HitSV directly analyzes the local haplotype sequence information (local contigs) of population samples instead of being based on VCF, avoiding the loss of some details when generating VCF, thereby better detecting and analyzing the complex structural variant composition of population samples. This function only applies to ASM and LRS datasets, not to SRS datasets, and the length of each specified interval cannot exceed 50,000 bp.
 
-#### 7.1 Population Sample Complex Structural Variant (CSV) Clustering Analysis
+#### 9.1 Population Sample Complex Structural Variant (CSV) Clustering Analysis
 
 General steps:
 
@@ -218,7 +243,7 @@ General steps:
 
 Refer to "cohort_csv_analysis.md" for the complete workflow.
 
-#### 7.2 Population Sample Complex Structural Variant Region - MEI-TR Array Detection
+#### 9.2 Population Sample Complex Structural Variant Region - MEI-TR Array Detection
 
 1. Re-call local contig sequences for each sample based on BED files;
 2. Contig sequence RM and TRF annotation;
@@ -226,19 +251,19 @@ Refer to "cohort_csv_analysis.md" for the complete workflow.
 
 Refer to "py/mei_tr_array_single_region_detection.py" for the complete workflow.
 
-Based on workflow 7.1, obtain the variant annotation results from repeat Masker: [region].fa.out, then execute:
+Based on workflow 9.1, obtain the variant annotation results from repeat Masker: [region].fa.out, then execute:
 
 ```bash
 python3 ./py/mei_tr_array_single_region_detection.py region.fa.out
 ```
 
-#### 7.3 Population Sample Complex Structural Variant Region - Nested Variant Detection
+#### 9.3 Population Sample Complex Structural Variant Region - Nested Variant Detection
 
 1. Re-call local contig sequences for each sample based on BED files;
 2. Contig sequence RM and TRF annotation;
 3. Nested variant detection;
 
-Obtain nested variant detection results based on the result file "nestedStructures.log" from workflow 7.1.
+Obtain nested variant detection results based on the result file "nestedStructures.log" from workflow 9.1.
 
 ## Demo
 
@@ -266,6 +291,10 @@ HitSV call -S 0 -E 0 -s 0 -F 1000000 -T SRS_HG002_stat.json -r  hs37d5_1_0_10000
 
 Fixed bug: A bug was identified, fixed, and the relevant update has been pushed to GitHub.
 When performing variant calling on next-generation sequencing (NGS) data, a local repeat rate file R for the reference genome is required as input. Previously, if this file was not provided, the program would still run, but errors might occur under certain circumstances. Now, when processing NGS data, the program will check for this file and terminate execution if the file is not found, thus avoiding potential issues.
+
+### v2.0.4 2026-06-24
+
+Implementation updates for diverse datasets. To support datasets with broader read-quality profiles and reference-to-sample divergence, we added several implementation options to HitSV. First, an optional contig-polishing step was added after local assembly to improve candidate contigs reconstructed from lower-accuracy long reads, such as ONT reads generated by older chemistries or ultralong-read protocols. Second, candidate-contig realignment was extended to support minimap2 assembly-alignment presets corresponding to different sequence-divergence levels. The ASM5 setting was used as the default for human datasets, whereas ASM10 or ASM20 was used when evaluating non-human species with larger divergence between the analyzed assembly and the reference genome. These options were used only to improve alignment robustness and allele reconstruction across datasets; the same repeat-aware signature-recognition framework was retained across human and non-human benchmarks.
 
 ## License
 

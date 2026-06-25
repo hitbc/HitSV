@@ -193,7 +193,7 @@ The default value is asm5.
 
 ### 7. Output Parameters
 
-- `-B, --output_format` : Specifies the format of the SV callset. Accepted values are VCF (default) and PURE_STR. The VCF option produces a standard VCF v4.2 file with HitSV‑specific annotations in the INFO field. The PURE_STR option writes a simplified tab‑delimited table containing only the core SV coordinates and types, which may be more convenient for custom downstream parsing.
+- `-B, --output_format` : Specifies the format of the SV callset. Accepted values are VCF (default) and PURE_STR. The VCF option produces a standard VCF v4.2 file. The PURE_STR option writes the assembled contigs around SVs.
 
 - `-f, --random_phasing` : Enables random phasing of heterozygous SVs. When set to 1 (default), unphased heterozygous genotypes (0/1) are randomly resolved to either 0|1 or 1|0, while homozygous alternative genotypes (1/1) are output as 1|1. All heterozygous variants residing on the same locally assembled contig are phased consistently. Set to 0 to output unphased genotypes without random assignment.
 
@@ -219,12 +219,12 @@ The generated results are stored in VCF format, with contigs stored in the INFO 
 HitSV call -b region.bed -l sample.LRS.bam -r ref.fa -o output.vcf 2> /dev/null
 ```
 
-#### Generate BED Format Results
+#### Generate Local Assembly Results
 
 The generated local contig results are stored in BED format for analysis of completed assembly data:
 
 ```bash
-HitSV call -B BED -b region.bed -l sample.ASM.bam -r ref.fa -o output.bed 2> /dev/null
+HitSV call -B BED -b region.bed -l sample.LRS.bam -B PURE_STR -r ref.fa -o output.txt 2> /dev/null
 ```
 
 ### 9. Structural Variant Analysis for Population Samples

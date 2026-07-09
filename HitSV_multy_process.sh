@@ -137,15 +137,15 @@ task_call_single_chr() {
     case "${MODE}" in
         LRS)
             ${HitSV_TOOL} call -S $i -E $i -p ${PRESET} -P ${PRESET_KSW} -l ${INPUT_LRS} -r ${REF} \
-                -o ${WORK_DIR}/PART_${i}_D.vcf >${WORK_DIR}/PART_${i}_D_1.log 2> ${WORK_DIR}/PART_${i}_D_2.log
+                -o ${WORK_DIR}/PART_${i}_D.vcf 2> /dev/null
             ;;
         SRS)
             ${HitSV_TOOL} call -S $i -E $i -n ${INPUT_SRS} -r ${REF} -I ${FA_IDX} -T ${STAT} -L ${TL} -P ${PRESET_KSW} \
-                -o ${WORK_DIR}/PART_${i}_D.vcf >${WORK_DIR}/PART_${i}_D_1.log 2> ${WORK_DIR}/PART_${i}_D_2.log
+                -o ${WORK_DIR}/PART_${i}_D.vcf 2> /dev/null
             ;;
         Hybrid)
             ${HitSV_TOOL} call -S $i -E $i -n ${INPUT_SRS} -l ${INPUT_LRS} -r ${REF} -I ${FA_IDX} -T ${STAT} -L ${TL} -p ${PRESET} -P ${PRESET_KSW} \
-                -o ${WORK_DIR}/PART_${i}_D.vcf >${WORK_DIR}/PART_${i}_D_1.log 2> ${WORK_DIR}/PART_${i}_D_2.log
+                -o ${WORK_DIR}/PART_${i}_D.vcf 2> /dev/null
             ;;
     esac
 

@@ -33,6 +33,7 @@ Table of Contents:
   * [4. Multi-process Processing](#4-multi-process-processing)
     * [Divide the Entire Genome into Different Regions for Simultaneous Variant Detection](#divide-the-entire-genome-into-different-regions-for-simultaneous-variant-detection)
     * [Merge Variant Detection Result Files into a Complete File](#merge-variant-detection-result-files-into-a-complete-file)
+    * [Built-in Multi-process Script](#built-in-multi-process-script)
   * [5. LRS error mode preset for local-assembly](#5-lrs-error-mode-preset-for-local-assembly)
   * [6. Contig-to-Reference Alignment Parameters (Applicable to Both LRS and SRS)](#6-contig-to-reference-alignment-parameters-applicable-to-both-lrs-and-srs)
   * [7. Output Parameters](#7-output-parameters)
@@ -171,7 +172,7 @@ cat chrY.vcf >> output.vcf
 
 This method is applicable to all analysis types (pure LRS, pure SRS, hybrid).
 
-#### Multi-process script
+#### Built-in Multi-process script
 
 The script HitSV_multy_process.sh provides an example showing how to divide the entire genome into different regions and run HitSV instances in parallel to achieve multi-process parallel variant detection.
 

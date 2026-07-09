@@ -1,8 +1,4 @@
 #!/bin/bash
-#SBATCH -o /home/user/ligaoyang/TMP/SOY_HITSV//call_default.log
-#SBATCH -p q10
-#SBATCH --mem=120g
-#SBATCH --cpus-per-task=20
 
 MODE=""
 HitSV_TOOL=""

@@ -13,7 +13,7 @@ Key Features:
 - Supports multiple sequencing platforms, including ASM (T2T), ONT, PacBio, Illumina, BGI-T7, etc.
 - Provides strategies for complex structural variant (CSV) analysis of population samples
 
-The structural variant (SV) detection results of HitSV tool on HG002/3/4/5/6/7 and the 1000 Genomes Project datasets are stored at https://github.com/hitbc/HitSV_call_results
+The structural variant (SV) detection results of HitSV tool on human sample HG002/3/4/5/6/7, the 1000 Genomes Project datasets and other species samples (including Macaca fascicularis, Mus musculus, Danio rerio, Drosophila melanogaster, Arabidopsis thaliana, Glycine max) are stored at https://github.com/hitbc/HitSV_call_results
 
 Table of Contents:
 
@@ -144,15 +144,10 @@ Provide both LRS and SRS datasets in a single HitSV-call to leverage their compl
 HitSV call -l sample.LRS.bam -n sample.SRS.bam -L TL.sort.bam -r ref.fa -I ref.stat.txt -o output.vcf 2> /dev/null
 ```
 
+
 ### 4. Multi-process Processing
 
-HitSV does not directly support multi-threaded variant detection. Multi-process parallelization can be achieved by dividing chromosomes into different regions and running multiple HitSV instances in parallel.
-
-The script HitSV_multy_process.sh provides an example showing how to divide the entire genome into 24 different regions and run 24 HitSV instances in parallel to achieve multi-process parallel variant detection.
-
-```bash
-bash HitSV_multy_process.sh sample.LRS.bam ./WORK_DIR ONT_Q26 ref.fa
-```
+HitSV does not directly support multi-threaded variant detection. Multi-process parallelization can be achieved by dividing chromosomes into different regions and running multiple HitSV instances in parallel. After all parallel jobs complete, the per-chromosome VCF results are merged into a single output file.
 
 Using the following multi-process processing method:
 
@@ -175,6 +170,148 @@ cat chrY.vcf >> output.vcf
 ```
 
 This method is applicable to all analysis types (pure LRS, pure SRS, hybrid).
+
+#### Multi-process script
+
+The script HitSV_multy_process.sh provides an example showing how to divide the entire genome into different regions and run HitSV instances in parallel to achieve multi-process parallel variant detection.
+
+#### Requirements
+
+- [HitSV](https://github.com/hitbc/HitSV) binary
+- [samtools](https://github.com/samtools/samtools) (required for SRS and Hybrid modes)
+- Bash 4.0+
+
+
+#### Usage
+
+```
+bash HitSV_multy_process.sh <MODE> [options]
+```
+
+#### Modes
+
+| Mode | Description |
+|------|-------------|
+| `LRS` | Long-read sequencing only |
+| `SRS` | Short-read sequencing only |
+| `Hybrid` | Combined SRS + LRS analysis |
+
+#### Options
+
+| Flag | Parameter | Description | Required By |
+|------|-----------|-------------|-------------|
+| `-t` | TOOL | Path to HitSV binary | All modes |
+| `-w` | WORK_DIR | Working directory (created if not exists) | All modes |
+| `-r` | REF | Reference genome FASTA | All modes |
+| `-P` | PRESET_KSW | Contig-to-reference alignment preset (`asm5`, `asm10`, `asm20`) | All modes |
+| `-i` | FA_IDX | Reference genome stat file (from `HitSV srs_fa_stat`) | SRS, Hybrid |
+| `-p` | PRESET | LRS error mode preset (`ONT_Q20`, `HIFI`, `ERR_PRONE`, `ASM`) | LRS, Hybrid |
+| `-n` | INPUT_SRS | SRS input BAM file | SRS, Hybrid |
+| `-l` | INPUT_LRS | LRS input BAM file | LRS, Hybrid |
+| `-m` | MAX_PARALLEL | Maximum parallel jobs (default: `20`) | Optional |
+| `-c` | MAX_CHR | Maximum chromosome index, 0-based (default: `2000`) | Optional |
+
+#### LRS Mode Examples
+
+```bash
+bash HitSV_multy_process.sh LRS \
+    -t /path/to/HitSV \
+    -p ONT_Q20 \
+    -P asm5 \
+    -l sample.LRS.bam \
+    -w ./work_lrs \
+    -r ref.fa
+```
+
+#### SRS Mode Examples
+
+```bash
+bash HitSV_multy_process.sh SRS \
+    -t /path/to/HitSV \
+    -P asm5 \
+    -n sample.SRS.bam \
+    -w ./work_srs \
+    -r ref.fa \
+    -i ref.stat.txt
+```
+#### Hybrid Mode Examples
+
+```bash
+bash HitSV_multy_process.sh Hybrid \
+    -t /path/to/HitSV \
+    -p ONT_Q20 \
+    -P asm5 \
+    -n sample.SRS.bam \
+    -l sample.LRS.bam \
+    -w ./work_hybrid \
+    -r ref.fa \
+    -i ref.stat.txt
+```
+
+#### Custom Chromosome Count
+
+For organisms with a known number of chromosomes (e.g., human: 22 autosomes + X + Y = 24, 0-based index 0–23):
+
+```bash
+bash HitSV_multy_process.sh LRS \
+    -c 23 \
+    -t /path/to/HitSV \
+    -p HIFI \
+    -P asm5 \
+    -l sample.LRS.bam \
+    -w ./work_lrs \
+    -r ref.fa
+```
+
+## Workflow
+
+The script executes the following steps depending on the selected mode:
+
+```
+┌─────────────────────────────────────────────┐
+│              Parse & Validate Args           │
+└────────────────────┬────────────────────────┘
+                     │
+         ┌───────────▼───────────┐
+         │  SRS or Hybrid mode?  │
+         └───┬─────────────┬─────┘
+            Yes            No (LRS)
+             │               │
+┌────────────▼──────────┐    │
+│ srs_bam_stat          │    │
+│ srs_trans_reads       │    │
+│ samtools sort + index │    │
+└────────────┬──────────┘    │
+             │               │
+┌────────────▼───────────────▼──┐
+│  Parallel per-chromosome call │
+│  seq 0..MAX_CHR | xargs -P   │
+└────────────────┬──────────────┘
+                 │
+┌────────────────▼──────────────┐
+│  Merge PART_*_D.vcf → VCF    │
+└───────────────────────────────┘
+```
+
+1. **Parallel Calling**: Dispatches HitSV `call` for each chromosome index (0 to `MAX_CHR`) in parallel, up to `MAX_PARALLEL` concurrent jobs. Each job writes its output to `PART_<chr>_D.vcf`.
+
+2. **Merge**: Concatenates all per-chromosome VCF files into a single `HitSV.vcf`, preserving the VCF header from chromosome 0.
+
+## Output
+
+All output is written to the specified `WORK_DIR`:
+
+| File | Description |
+|------|-------------|
+| `HitSV.vcf` | Final merged VCF result |
+| `PART_<i>_D.vcf` | Per-chromosome VCF (intermediate) |
+| `D_ALL.log` | Overall progress log |
+
+#### Parameter Reference for HitSV Call
+
+For details on HitSV-specific parameters (e.g., `-p` presets, `-P` alignment presets), refer to the [HitSV documentation](https://github.com/hitbc/HitSV#usage).
+
+
 
 ### 5. LRS error mode preset for local-assembly
 

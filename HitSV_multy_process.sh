@@ -25,7 +25,7 @@ Options:
   -t TOOL       Path to HitSV tool
   -w WORK_DIR   Working directory
   -r REF        Reference genome
-  -i FA_IDX     FA index (required for SRS/Hybrid)
+  -i FA_IDX     Reference genome stat file (from `HitSV srs_fa_stat`) (required for SRS/Hybrid)
   -p PRESET     Preset (required for LRS/Hybrid)
   -P PRESET_KSW KSW preset (required for all modes)
   -n INPUT_SRS  SRS input BAM (required for SRS/Hybrid)
@@ -38,10 +38,10 @@ Examples:
     $0 LRS -t /path/to/HitSV -p preset -P ksw_preset -l input.bam -w work_dir -r ref.fa
 
   SRS mode:
-    $0 SRS -t /path/to/HitSV -P ksw_preset -n input.bam -w work_dir -r ref.fa -i ref.fa.fai
+    $0 SRS -t /path/to/HitSV -P ksw_preset -n input.bam -w work_dir -r ref.fa -i ref.fa.idx
 
   Hybrid mode:
-    $0 Hybrid -t /path/to/HitSV -p preset -P ksw_preset -n srs.bam -l lrs.bam -w work_dir -r ref.fa -i ref.fa.fai
+    $0 Hybrid -t /path/to/HitSV -p preset -P ksw_preset -n srs.bam -l lrs.bam -w work_dir -r ref.fa -i ref.fa.idx
 EOF
     exit 1
 }

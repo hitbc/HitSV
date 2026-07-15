@@ -1,4 +1,8 @@
 #!/bin/bash
+#SBATCH -o /home/user/ligaoyang/TMP/SOY_HITSV//call_default_SRS.log
+#SBATCH -p q10
+#SBATCH --mem=120g
+#SBATCH --cpus-per-task=20
 
 MODE=""
 HitSV_TOOL=""
@@ -9,6 +13,8 @@ PRESET=""
 PRESET_KSW=""
 INPUT_SRS=""
 INPUT_LRS=""
+INPUT_TUMOR=""
+INPUT_NORMAL=""
 MAX_PARALLEL=20
 MAX_CHR=2000
 
@@ -18,6 +24,7 @@ Usage: $0 <MODE> [options]
 
 Modes:
   LRS     Long-read sequencing only
+  Somatic Somatic SV calling (LRS tumor vs normal)
   SRS     Short-read sequencing only
   Hybrid  Combined SRS + LRS analysis
 
@@ -26,16 +33,21 @@ Options:
   -w WORK_DIR   Working directory
   -r REF        Reference genome
   -i FA_IDX     Reference genome stat file (from `HitSV srs_fa_stat`) (required for SRS/Hybrid)
-  -p PRESET     Preset (required for LRS/Hybrid)
+  -p PRESET     Preset (required for LRS/Somatic/Hybrid)
   -P PRESET_KSW KSW preset (required for all modes)
   -n INPUT_SRS  SRS input BAM (required for SRS/Hybrid)
   -l INPUT_LRS  LRS input BAM (required for LRS/Hybrid)
+  -X INPUT_TUMOR  LRS tumor BAM (required for Somatic)
+  -x INPUT_NORMAL LRS normal BAM (required for Somatic)
   -m MAX_PARALLEL  Max parallel jobs (default: 20)
   -c MAX_CHR       Max chromosome index (default: 2000)
 
 Examples:
   LRS mode:
     $0 LRS -t /path/to/HitSV -p preset -P ksw_preset -l input.bam -w work_dir -r ref.fa
+
+  Somatic mode:
+    $0 Somatic -t /path/to/HitSV -p preset -P ksw_preset -X tumor.bam -x normal.bam -w work_dir -r ref.fa
 
   SRS mode:
     $0 SRS -t /path/to/HitSV -P ksw_preset -n input.bam -w work_dir -r ref.fa -i ref.fa.idx
@@ -54,14 +66,14 @@ MODE=$1
 shift
 
 case "${MODE}" in
-    LRS|SRS|Hybrid) ;;
+    LRS|Somatic|SRS|Hybrid) ;;
     *)
-        echo "Error: Invalid mode '${MODE}'. Must be LRS, SRS, or Hybrid."
+        echo "Error: Invalid mode '${MODE}'. Must be LRS, Somatic, SRS, or Hybrid."
         usage
         ;;
 esac
 
-while getopts "t:w:r:i:p:P:n:l:m:c:" opt; do
+while getopts "t:w:r:i:p:P:n:l:X:x:m:c:" opt; do
     case ${opt} in
         t) HitSV_TOOL=${OPTARG} ;;
         w) WORK_DIR=${OPTARG} ;;
@@ -71,6 +83,8 @@ while getopts "t:w:r:i:p:P:n:l:m:c:" opt; do
         P) PRESET_KSW=${OPTARG} ;;
         n) INPUT_SRS=${OPTARG} ;;
         l) INPUT_LRS=${OPTARG} ;;
+        X) INPUT_TUMOR=${OPTARG} ;;
+        x) INPUT_NORMAL=${OPTARG} ;;
         m) MAX_PARALLEL=${OPTARG} ;;
         c) MAX_CHR=${OPTARG} ;;
         *) usage ;;
@@ -82,10 +96,26 @@ if [ -z "${HitSV_TOOL}" ] || [ -z "${WORK_DIR}" ] || [ -z "${REF}" ] || [ -z "${
     usage
 fi
 
+if [ ! -f "${HitSV_TOOL}" ]; then
+    echo "Error: HitSV tool not found: ${HitSV_TOOL}"
+    exit 1
+fi
+
+if [ ! -f "${REF}" ]; then
+    echo "Error: Reference file not found: ${REF}"
+    exit 1
+fi
+
 case "${MODE}" in
     LRS)
         if [ -z "${INPUT_LRS}" ] || [ -z "${PRESET}" ]; then
             echo "Error: LRS mode requires -l (INPUT_LRS) and -p (PRESET)."
+            usage
+        fi
+        ;;
+    Somatic)
+        if [ -z "${INPUT_TUMOR}" ] || [ -z "${INPUT_NORMAL}" ] || [ -z "${PRESET}" ]; then
+            echo "Error: Somatic mode requires -X (INPUT_TUMOR), -x (INPUT_NORMAL), and -p (PRESET)."
             usage
         fi
         ;;
@@ -135,6 +165,10 @@ task_call_single_chr() {
             ${HitSV_TOOL} call -S $i -E $i -p ${PRESET} -P ${PRESET_KSW} -l ${INPUT_LRS} -r ${REF} \
                 -o ${WORK_DIR}/PART_${i}_D.vcf 2> /dev/null
             ;;
+        Somatic)
+            ${HitSV_TOOL} call -S $i -E $i -p ${PRESET} -P ${PRESET_KSW} -X ${INPUT_TUMOR} -x ${INPUT_NORMAL} -r ${REF} \
+                -o ${WORK_DIR}/PART_${i}_D.vcf 2> /dev/null
+            ;;
         SRS)
             ${HitSV_TOOL} call -S $i -E $i -n ${INPUT_SRS} -r ${REF} -I ${FA_IDX} -T ${STAT} -L ${TL} -P ${PRESET_KSW} \
                 -o ${WORK_DIR}/PART_${i}_D.vcf 2> /dev/null
@@ -145,10 +179,15 @@ task_call_single_chr() {
             ;;
     esac
 
-    echo "Finished task $i" >> ${WORK_DIR}/D_ALL.log
+    local exit_code=$?
+    if [ ${exit_code} -eq 0 ]; then
+        echo "Finished task $i [SUCCESS]" >> ${WORK_DIR}/D_ALL.log
+    else
+        echo "Finished task $i [FAILED] (exit code: ${exit_code})" >> ${WORK_DIR}/D_ALL.log
+    fi
 }
 export -f task_call_single_chr
-export HitSV_TOOL WORK_DIR INPUT_SRS INPUT_LRS FA_IDX REF STAT TL PRESET PRESET_KSW MODE
+export HitSV_TOOL WORK_DIR INPUT_SRS INPUT_LRS INPUT_TUMOR INPUT_NORMAL FA_IDX REF STAT TL PRESET PRESET_KSW MODE
 
 seq 0 ${MAX_CHR} | xargs -P ${MAX_PARALLEL} -I {} bash -c 'task_call_single_chr {}'
 

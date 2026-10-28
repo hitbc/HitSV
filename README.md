@@ -47,6 +47,7 @@ Table of Contents:
 * [Demo](#demo)
 * [Changelog](#Changelog)
 * [License](#license)
+* [Publications](#Publications)
 * [Contact](#Contact)
 
 ## Introduction
@@ -437,6 +438,10 @@ Implementation updates for diverse datasets. To support datasets with broader re
 ## License
 
 This project is protected by the [GNU GPL v3](LICENSE) license.
+
+## Publications
+
+Li, G., Liu, Y., Zhang, A. et al. Structural variant detection across sequencing technologies. *Nat Biotechnol* (2026). https://doi.org/10.1038/s41587-026-03332-9
 
 ## Contact
 - **Gaoyang Li (李高阳)**

@@ -1,8 +1,8 @@
-# HitSV: Maximizing discovery of structural variants across sequencing technologies
+# Structural variant detection across sequencing technologies (HitSV)
 
 ## Overview
 
-HitSV (Original name: gcSV) is a comprehensive structural variant detection method that supports multiple sequencing data types and analysis modes, enabling accurate detection and genotyping of structural variants in genomes.
+HitSV is a comprehensive structural variant detection method that supports multiple sequencing data types and analysis modes, enabling accurate detection and genotyping of structural variants in genomes.
 
 Key Features:
 - Supports structural variant detection and genotyping using pure long-read sequencing (LRS) data
@@ -439,6 +439,8 @@ Implementation updates for diverse datasets. To support datasets with broader re
 This project is protected by the [GNU GPL v3](LICENSE) license.
 
 ## Contact
+- **Gaoyang Li (李高阳)**
 - Email: harryrosellegustav@gmail.com
 - WeChat: fenghe728
+
 Feel free to reach out via either channel.

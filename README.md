@@ -47,7 +47,7 @@ Table of Contents:
 * [Demo](#demo)
 * [Changelog](#Changelog)
 * [License](#license)
-
+* [Contact](#Contact)
 
 ## Introduction
 

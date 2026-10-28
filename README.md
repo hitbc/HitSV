@@ -437,3 +437,8 @@ Implementation updates for diverse datasets. To support datasets with broader re
 ## License
 
 This project is protected by the [GNU GPL v3](LICENSE) license.
+
+## Contact
+- Email: harryrosellegustav@gmail.com
+- WeChat: fenghe728
+Feel free to reach out via either channel.
